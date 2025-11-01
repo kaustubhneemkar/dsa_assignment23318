@@ -3,134 +3,136 @@ Task Scheduling System (Queue): Managing tasks in a first-in, first-out (FIFO) o
 as print job scheduling or process management in an operating system.
 */
 
-#include<iostream>
+#include <iostream>
 using namespace std;
 
-enum level{
-    // enum to define the levels for difficulty and priority
-    low=0,medium=1,high=2
-};
-typedef struct Task{
-    // Task structure for a node
+// Enum for difficulty and priority levels
+enum Level { LOW = 0, MEDIUM = 1, HIGH = 2 };
+
+// Structure to represent a Task
+struct Task {
     string title;
-    enum level priority;
-    enum level difficulty;
+    Level difficulty;
+    Level priority;
     Task* next;
-} Task;
-
-class my_queue{
-    Task* front=NULL;
-    Task* rear=NULL;
-    public:
-        Task* get_node(){
-            // Function to create a new node by taking necessary input and validation
-            int flag1=0,flag2=0,flag0=0;
-            int difficulty;
-            string title;
-            int priority;
-            do{
-                if(!flag0){   
-                    cout<<"Enter Title of Task:";
-                    cin>>title;
-                    flag0=1;
-                }
-                if(!flag1){
-                    cout<<"Enter Difficulty of Task(0->Low,1->Medium,2->High):";    
-                    cin>>difficulty;
-                    flag1=difficulty>=0 && difficulty<=2;
-                }
-                if(!flag2){
-                    cout<<"Enter Priority of Task(0->Low,1->Medium,2->High):";
-                    cin>>priority;
-                    flag2=priority>=0 && priority<=2;
-                }
-            }while(!(flag1 && flag2));
-            enum level arr[]={low,medium,high};
-            Task* new_node=new Task();
-            new_node->title=title;
-            new_node->difficulty=arr[difficulty];
-            new_node->priority=arr[priority];
-            return new_node;
-        }
-        void enqueue(){
-            // Insert node at rear
-            Task* new_node=get_node();
-            if(front==NULL){
-                front=new_node;
-                rear=new_node;
-            }
-            else{
-                rear->next=new_node;
-                rear=new_node;
-            }
-        }
-        void dequeue(){
-            // Delete node from front
-            if(front==NULL){
-                cout<<"Queue is empty!\n";
-            }
-            else{
-                Task* temp=front;
-                front=front->next;
-                delete temp;
-            }
-        }
-        Task* peek(){
-            // Return front element
-            if(isEmpty()){
-                cout<<"Queue is empty!";
-                return NULL;
-            }
-            else{
-                return front;
-            }
-        }
-        bool isEmpty(){
-            //Check if queue is empty
-            return front==NULL;
-        }
-
 };
-int main(){
-    my_queue Tasks;
-    while(true){
-        cout<<"Enter 0(Exit),1(Add Task),2(Complete Task),3(Peek):";
-        int choice;
-        cin>>choice;
-        switch(choice){
-            case 0:
-                cout<<"Exiting, Bye!\n";
-                exit(0);
-                break;
+
+// Class to represent a queue of tasks
+class TaskQueue {
+    Task* front;
+    Task* rear;
+
+public:
+    TaskQueue() {
+        front = NULL;
+        rear = NULL;
+    }
+
+    // Create a new task node with user input
+    Task* createTask() {
+        Task* newTask = new Task();
+        int diff, prio;
+
+        cout << "Enter task title: ";
+        cin >> newTask->title;
+
+        cout << "Enter difficulty (0: Low, 1: Medium, 2: High): ";
+        cin >> diff;
+
+        cout << "Enter priority (0: Low, 1: Medium, 2: High): ";
+        cin >> prio;
+
+        // Convert input integers into enum values
+        newTask->difficulty = static_cast<Level>(diff);
+        newTask->priority = static_cast<Level>(prio);
+        newTask->next = NULL;
+
+        return newTask;
+    }
+
+    // Add a task to the queue (at the rear)
+    void enqueue() {
+        Task* newTask = createTask();
+
+        if (rear == NULL) {  // If queue is empty
+            front = rear = newTask;
+        } else {
+            rear->next = newTask;
+            rear = newTask;
+        }
+
+        cout << "Task added successfully!\n";
+    }
+
+    // Remove a task from the queue (from the front)
+    void dequeue() {
+        if (front == nullptr) {
+            cout << "Queue is empty! No task to remove.\n";
+            return;
+        }
+
+        Task* temp = front;
+        front = front->next;
+
+        cout << "ask \"" << temp->title << "\" completed and removed.\n";
+        delete temp;
+
+        if (front == NULL)  // If queue became empty
+            rear = NULL;
+    }
+
+    // Show the front (next) task
+    void peek() {
+        if (front == nullptr) {
+            cout << "No tasks in the queue.\n";
+            return;
+        }
+
+        cout << "\n--- Next Task ---\n";
+        cout << "Title: " << front->title << endl;
+        cout << "Difficulty: " << front->difficulty << endl;
+        cout << "Priority: " << front->priority << endl;
+        cout << "-----------------\n";
+    }
+
+    // Check if queue is empty
+    bool isEmpty() {
+        return front == nullptr;
+    }
+};
+
+int main() {
+    TaskQueue tq;
+    int choice;
+
+    while (true) {
+        cout << "\n=== Task Scheduler Menu ===\n";
+        cout << "1. Add Task\n";
+        cout << "2. Complete Task\n";
+        cout << "3. View Next Task\n";
+        cout << "0. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
             case 1:
-                Tasks.enqueue();
-                cout<<"Task Added to front!\n";
+                tq.enqueue();
                 break;
             case 2:
-                if(Tasks.isEmpty()){
-                    cout<<"No Tasks to Complete\n";
-                }
-                else {
-                    Tasks.dequeue();
-                    cout<<"Task Completed\n";
-                }
+                tq.dequeue();
                 break;
             case 3:
-                if(Tasks.isEmpty()){
-                    cout<<"No Tasks to Show\n";
-                }
-                else{
-                    Task* first_task=Tasks.peek();
-                    cout<<"Title:"<<first_task->title<<'\n';
-                    cout<<"Difficulty:"<<first_task->difficulty<<'\n';
-                    cout<<"Priority:"<<first_task->priority<<"\n";
-                }
+                tq.peek();
                 break;
+            case 0:
+                cout << " Exiting program. Bye!\n";
+                return 0;
             default:
-                cout<<"Invalid choice entered!\n";
-
+                cout << " Invalid choice. Try again.\n";
         }
     }
-    return 0;
 }
+
+}
+
 
